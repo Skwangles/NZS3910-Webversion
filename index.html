@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NZS3910 Due Dates</title>
+</head>
+
+<body>
+    <form id="dateSelect">
+        <label for="region">Choose your region:</label>
+        <select name="region" id="region" form="dateSelect" required> 
+        <option value="Auckland">Auckland</option>
+        <option value="Bay of Plenty">BoP</option>
+        <option value="Canterbury">Canterbury</option>
+        <option value="Gisborne">Gisborne</option>
+        <option value="Hawke's Bay">Hawke's Bay</option>
+        <option value="Manwatu-Whanganui">Manawatu-Whanganui</option>
+        <option value="Marlborough">Marlborough</option>
+        <option value="Nelson">Nelson</option>
+        <option value="Northland">Northland</option>
+        <option value="Otago">Otago</option>
+        <option value="Southland">Southland</option>
+        <option value="Taranaki">Taranaki</option>
+        <option value="Tasman">Tasman</option>
+        <option value="Waikato">Waikato</option>
+        <option value="Wellington">Wellington</option>
+        <option value="West Coast"></option>
+    </select>
+        <input type="date" name="start" id="startDate" required pattern="\d{4}-\d{2}-\d{2}">
+
+        <button type="submit">Calculate!</button>
+    </form>
+</body>
+
+</html>
