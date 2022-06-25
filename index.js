@@ -1,16 +1,22 @@
 var holidaysFromInternet = {};
 var impactingHolidays = [];
-const numOfWorkDays = 17 + 7;
-const keyDays = [{ "days": 6, "desc": "Engineer issue Progress Payment Schedule" },
-    { "days": 9, "desc": "Principal advise amendments/deductions" },
-    { "days": 11, "desc": "Engineer issue replacement Schedule (if applicable)" },
-    { "days": 23, "desc": "Principal makes payment" }
+const numOfWorkDays = 17 + 8; //Day 0 included
+const keyDays = [{ "days": 7, "desc": "Engineer issue Progress Payment Schedule" },
+    { "days": 10, "desc": "Principal advise amendments/deductions" },
+    { "days": 12, "desc": "Engineer issue replacement Schedule (if applicable)" },
+    { "days": 24, "desc": "Principal makes payment" }
 ];
 const calcLog = document.getElementById('calculations');
+const startDateItems = document.getElementById('startDate');
+const regionSelect = document.getElementById('region')
+const regionStorage = "";
 
-$("#submitForm").click(function() {
-    var datastring = JSON.parse(JSON.stringify(jQuery('#dateSelect').serializeArray()));
-    startCount(datastring[1].value, datastring[0].value); //0-region, 1-date
+$(document).ready(function() {
+    startDateItems.valueAsDate = new Date();
+    $("#submitForm").click(function() {
+        var datastring = JSON.parse(JSON.stringify(jQuery('#dateSelect').serializeArray()));
+        startCount(datastring[1].value, datastring[0].value); //0-region, 1-date
+    });
 });
 
 
@@ -41,8 +47,11 @@ function remove_cursor_wait() {
  * @param {string} region 
  */
 function startCount(date, region) {
+    if (date == "" || typeof date == undefined || region == "" || typeof region == undefined) //Input checking
+        return; //Doesn't have all info
+
     cursor_wait();
-    calcLog.innerHTML = "";
+    calcLog.innerHTML = "<h3>Calculation Breakdown:</h3>";
     impactingHolidays = []; //must clear otherwise will have overlapping
     let dateObject = new Date(date);
     if (Object.keys(holidaysFromInternet).length === 0) { //Don't need to requery if already populated
@@ -50,7 +59,6 @@ function startCount(date, region) {
                 $.getJSON('https://www.googleapis.com/calendar/v3/calendars/en.new_zealand%23holiday%40group.v.calendar.google.com/events?key=AIzaSyD2Xy5SVR22tomUkKkxKEGMIboLbAO0ATE', (data) => {
                     console.log(data)
                     resolve(data);
-
                 });
 
             }).then(value => {
@@ -80,7 +88,7 @@ function calculateKeyDates(calcDate, region, importantDates) {
         calcLog.innerHTML += "<br>";
 
         if (isWorkingDay(calcDate, region)) {
-            calcLog.innerHTML += "Day #: <b>" + (increment + 1) + "</b>";
+            calcLog.innerHTML += "Day #: <b>" + (increment) + "</b>";
             calcLog.innerHTML += " " + calcDate.toDateString();
 
             for (let num in importantDates) {
@@ -102,14 +110,15 @@ function calculateKeyDates(calcDate, region, importantDates) {
         calcDate.setDate(calcDate.getDate() + 1); //may have issue with 29th feb & 31sts
     }
 
-    var cal = ics();
-    for (num in importantDates) {
-        let dateItem = importantDates[num]
-        cal.addEvent(dateItem.desc, "NZS3910 - Contractor Claims Date", "", dateItem.date, dateItem.date);
+    //To Do - implement events downloads
+    // var cal = ics();
+    // for (num in importantDates) {
+    //     let dateItem = importantDates[num]
+    //     cal.addEvent(dateItem.desc, "NZS3910 - Contractor Claims Date", "", dateItem.date, dateItem.date);
 
-    }
-    console.log(cal);
-    cal.download("NZS3910-ContractorClaims");
+    // }
+    // console.log(cal);
+    // cal.download("NZS3910-ContractorClaims");
 
 
     const dateOut = document.getElementById("dateOut");
