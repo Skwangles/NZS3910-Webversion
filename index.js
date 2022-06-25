@@ -1,20 +1,68 @@
 var holidaysFromInternet = {};
 var impactingHolidays = [];
-const numOfWorkDays = 17 + 6;
-const keyDays = [17, 14, 12, 0];
+const numOfWorkDays = 17 + 7;
+const keyDays = [{ "days": 6, "desc": "Engineer issue Progress Payment Schedule" },
+    { "days": 9, "desc": "Principal advise amendments/deductions" },
+    { "days": 11, "desc": "Engineer issue replacement Schedule (if applicable)" },
+    { "days": 23, "desc": "Principal makes payment" }
+];
+const calcLog = document.getElementById('calculations');
+
+$("#submitForm").click(function() {
+    var datastring = JSON.parse(JSON.stringify(jQuery('#dateSelect').serializeArray()));
+    startCount(datastring[1].value, datastring[0].value); //0-region, 1-date
+});
+
+
+function cursor_wait() {
+    // switch to cursor wait for the current element over
+    var elements = $(':hover');
+    if (elements.length) {
+        // get the last element which is the one on top
+        elements.last().addClass('cursor-wait');
+    }
+    // use .off() and a unique event name to avoid duplicates
+    $('html').
+    off('mouseover.cursorwait').
+    on('mouseover.cursorwait', function(e) {
+        // switch to cursor wait for all elements you'll be over
+        $(e.target).addClass('cursor-wait');
+    });
+}
+
+function remove_cursor_wait() {
+    $('html').off('mouseover.cursorwait'); // remove event handler
+    $('.cursor-wait').removeClass('cursor-wait'); // get back to default
+}
 
 /**
- * Starts the counting mechanism
+ * Starts calculating the working days from the selected date
+ * @param {DateString} startDate 
+ * @param {string} region 
  */
-function startCount() {
-    impactingHolidays = [];
-    const date = document.getElementById('startDate').value;
-    const region = document.getElementById('region').value;
+function startCount(date, region) {
+    cursor_wait();
+    calcLog.innerHTML = "";
+    impactingHolidays = []; //must clear otherwise will have overlapping
     let dateObject = new Date(date);
     if (Object.keys(holidaysFromInternet).length === 0) { //Don't need to requery if already populated
-        getHolidaysFromInternet().then(calculateKeyDates(dateObject, numOfWorkDays, region, keyDays)); //must wait for function to finish
+        new Promise((resolve, reject) => {
+                $.getJSON('https://www.googleapis.com/calendar/v3/calendars/en.new_zealand%23holiday%40group.v.calendar.google.com/events?key=AIzaSyD2Xy5SVR22tomUkKkxKEGMIboLbAO0ATE', (data) => {
+                    console.log(data)
+                    resolve(data);
+
+                });
+
+            }).then(value => {
+                holidaysFromInternet = parseHolidays(value)
+                calculateKeyDates(dateObject, region, keyDays)
+            })
+            .catch(error => {
+                console.log(error);
+                remove_cursor_wait();
+            }); //must wait for function to finish
     } else {
-        calculateKeyDates(dateObject, region);
+        calculateKeyDates(dateObject, region, keyDays);
     }
 }
 
@@ -24,22 +72,63 @@ function startCount() {
  * @param {*} publicHolidays API object from google calendar
  * @param {*} workingDays 17 + 7 as laid out in NZS3910
  */
-function calculateKeyDates(calcDate, workingDays, region, importantDates) {
+function calculateKeyDates(calcDate, region, importantDates) {
+    let increment = 0;
 
     var dateValues = [];
-    while (workingDays >= 0) {
-        if (isWorkingDay(calcDate, publicHolidays, region)) {
+    while (increment < numOfWorkDays) {
+        calcLog.innerHTML += "<br>";
+
+        if (isWorkingDay(calcDate, region)) {
+            calcLog.innerHTML += "Day #: <b>" + (increment + 1) + "</b>";
+            calcLog.innerHTML += " " + calcDate.toDateString();
+
             for (let num in importantDates) {
-                if (importantDates[num] == workingDays) {
-                    dateValues.push(calcDate);
+                if (importantDates[num].days === increment) {
+                    console.log(num + " Trigger:" + importantDates[num].days + " " + calcDate)
+                    dateValues.push({
+                        "date": calcDate.toDateString(),
+                        "desc": importantDates[num].desc
+                    });
+                    calcLog.innerHTML += " <b>" + importantDates[num].desc + "</b>";
                     break; //Should be a max of 1 importantDate per day   
                 }
             }
-            workingDays--;
+
+            increment++;
+        } else {
+            calcLog.innerHTML += calcDate.toDateString();
         }
-        workingDays.setDate(workingDays.getDate() + 1); //may have issue with 29th feb & 31sts
+        calcDate.setDate(calcDate.getDate() + 1); //may have issue with 29th feb & 31sts
     }
 
+    var cal = ics();
+    for (num in importantDates) {
+        let dateItem = importantDates[num]
+        cal.addEvent(dateItem.desc, "NZS3910 - Contractor Claims Date", "", dateItem.date, dateItem.date);
+
+    }
+    console.log(cal);
+    cal.download("NZS3910-ContractorClaims");
+
+
+    const dateOut = document.getElementById("dateOut");
+    dateOut.innerHTML = "";
+    dateValues.forEach(element => {
+        console.log(element);
+        var parentDiv = document.createElement('div');
+        parentDiv.className = 'card card-body';
+        var newElement = document.createElement("h4");
+        newElement.innerHTML = element.desc;
+        var newP = document.createElement("p");
+        newP.innerHTML = element.date;
+
+        parentDiv.appendChild(newElement);
+        parentDiv.appendChild(newP);
+        dateOut.appendChild(parentDiv);
+    });
+    console.log(impactingHolidays);
+    remove_cursor_wait();
 }
 
 
@@ -48,41 +137,36 @@ function calculateKeyDates(calcDate, workingDays, region, importantDates) {
  * @param {Date} startDate Date to check
  * @param {*}} publicHolidays list of all the publicHolidays
  * @param {String} region region selected
- * @returns 
+ * @returns is a working date Bool
  */
-function isWorkingDay(startDate, publicHolidays, region) {
-    if (startDate.getDay() % 6 === 0) { //Weekend
+function isWorkingDay(startDate, region) {
+    if (startDate.getDay() % 6 == 0) { //Weekend
+        calcLog.innerHTML += "<b>Non-working day</b> - "
         return false;
     }
-    if (startDate.prototype.getMonth() == 11 && startDate.prototype.getDate() >= 23) { //Zero indexed values - 24th Dec onwards 
+    if (startDate.getMonth() == 11 && startDate.getDate() >= 23) { //Zero indexed values - 24th Dec onwards
+        calcLog.innerHTML += "<b>Non-working day</b> - "
         return false;
-    } else if (startDate.prototype.getMonth() == 0 && startDate.prototype.getDate() <= 4) //Zero indexed - before & = to jan 5th
+    } else if (startDate.getMonth() == 0 && startDate.getDate() <= 4) //Zero indexed - before & = to jan 5th
     {
+        calcLog.innerHTML += "<b>Non-working day</b> - "
         return false;
     }
-    for (const item in publicHolidays) {
-        if ((publicHolidays[item].description.includes(region) || publicHolidays[item].description === "Public holiday") && new Date(publicHolidays[item].date) == startDate) {
+
+    //Check if in holidc
+
+    for (const item in holidaysFromInternet) {
+        if ((holidaysFromInternet[item].description.includes(region) || holidaysFromInternet[item].description === "Public holiday") && new Date(holidaysFromInternet[item].date).toDateString() == startDate.toDateString()) {
             //Match is found
-            impactingHolidays.push(publicHolidays[item]);
+            impactingHolidays.push(holidaysFromInternet[item]);
+            calcLog.innerHTML += "<b>Non-working day</b> - " + holidaysFromInternet[item].summary + " - "; //Print to calculations log div
             return false;
         }
+
     }
     return true;
 }
 
-
-
-
-
-/**
- * Uses api key to fetch the current public holidays
- */
-function getHolidaysFromInternet() {
-
-    fetch('https://www.googleapis.com/calendar/v3/calendars/en.new_zealand%23holiday%40group.v.calendar.google.com/events?key=AIzaSyD2Xy5SVR22tomUkKkxKEGMIboLbAO0ATE')
-        .then(res => holidaysFromInternet = res.json())
-        .catch(error => console.error('Error:', error));
-}
 
 
 
@@ -91,15 +175,17 @@ function getHolidaysFromInternet() {
  * @param {*} holidaysJSON From the google calendar API
  */
 function parseHolidays(holidaysJSON) {
+    console.log("Holidays Parsed");
     Holidays = []
-    for (const item in publicHolidays.items) {
-        if (publicHolidays.items[item].description.includes("Public holiday")) {
+    for (const item in holidaysJSON.items) {
+        if (holidaysJSON.items[item].description.includes("Public holiday")) {
             let dateValue = new Date(holidaysJSON.items[item].start.date);
-            if (dateValue.getDay() % 6 === 0) { //Long weekend case
-                date.setDate(date.getDate() + (dateValue.getDay() == 0 ? 1 : 2)); //Apparently this may have issues with 29th feb & 31sts
-                holidaysJSON.items[item].start.date = date.toDateString();
+            if (dateValue.getDay() % 6 == 0) { //Long weekend case
+                dateValue.setDate(dateValue.getDate() + (dateValue.getDay() == 0 ? 1 : 2)); //Apparently this may have issues with 29th feb & 31sts
+                holidaysJSON.items[item].start.date = dateValue.toDateString();
             }
             Holidays.push({ "summary": holidaysJSON.items[item].summary, "date": holidaysJSON.items[item].start.date, "description": holidaysJSON.items[item].description })
         }
     }
+    return Holidays;
 }
