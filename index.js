@@ -1,6 +1,8 @@
-var holidaysFromInternet = {};
-var impactingHolidays = [];
+let holidaysFromInternet = {};
+let impactingHolidays = [];
+let dateValues = [];
 const numOfWorkDays = 17 + 8; //Day 0 included
+let cal = ics();
 const keyDays = [{ "days": 7, "desc": "Engineer issue Progress Payment Schedule" },
     { "days": 10, "desc": "Principal advise amendments/deductions" },
     { "days": 12, "desc": "Engineer issue replacement Schedule (if applicable)" },
@@ -11,35 +13,20 @@ const startDateItems = document.getElementById('startDate');
 const regionSelect = document.getElementById('region')
 const regionStorage = "";
 
+
+
 $(document).ready(function() {
     startDateItems.valueAsDate = new Date();
     $("#submitForm").click(function() {
-        var datastring = JSON.parse(JSON.stringify(jQuery('#dateSelect').serializeArray()));
+        let datastring = JSON.parse(JSON.stringify(jQuery('#dateSelect').serializeArray()));
         startCount(datastring[1].value, datastring[0].value); //0-region, 1-date
     });
 });
 
-
-function cursor_wait() {
-    // switch to cursor wait for the current element over
-    var elements = $(':hover');
-    if (elements.length) {
-        // get the last element which is the one on top
-        elements.last().addClass('cursor-wait');
-    }
-    // use .off() and a unique event name to avoid duplicates
-    $('html').
-    off('mouseover.cursorwait').
-    on('mouseover.cursorwait', function(e) {
-        // switch to cursor wait for all elements you'll be over
-        $(e.target).addClass('cursor-wait');
-    });
+function downloadICS() {
+    cal.download("NZS3910-Contractor-Claims");
 }
 
-function remove_cursor_wait() {
-    $('html').off('mouseover.cursorwait'); // remove event handler
-    $('.cursor-wait').removeClass('cursor-wait'); // get back to default
-}
 
 /**
  * Starts calculating the working days from the selected date
@@ -83,7 +70,7 @@ function startCount(date, region) {
 function calculateKeyDates(calcDate, region, importantDates) {
     let increment = 0;
 
-    var dateValues = [];
+    dateValues = [];
     while (increment < numOfWorkDays) {
         calcLog.innerHTML += "<br>";
 
@@ -96,7 +83,8 @@ function calculateKeyDates(calcDate, region, importantDates) {
                     console.log(num + " Trigger:" + importantDates[num].days + " " + calcDate)
                     dateValues.push({
                         "date": calcDate.toDateString(),
-                        "desc": importantDates[num].desc
+                        "desc": importantDates[num].desc,
+                        "dateObject": calcDate.toString()
                     });
                     calcLog.innerHTML += " <b>" + importantDates[num].desc + "</b>";
                     break; //Should be a max of 1 importantDate per day   
@@ -110,19 +98,11 @@ function calculateKeyDates(calcDate, region, importantDates) {
         calcDate.setDate(calcDate.getDate() + 1); //may have issue with 29th feb & 31sts
     }
 
-    //To Do - implement events downloads
-    // var cal = ics();
-    // for (num in importantDates) {
-    //     let dateItem = importantDates[num]
-    //     cal.addEvent(dateItem.desc, "NZS3910 - Contractor Claims Date", "", dateItem.date, dateItem.date);
-
-    // }
-    // console.log(cal);
-    // cal.download("NZS3910-ContractorClaims");
 
 
+    //Set view for users
     const dateOut = document.getElementById("dateOut");
-    dateOut.innerHTML = "";
+    dateOut.innerHTML = "<button class=\"btn btn-primary\" onclick=\"downloadICS()\">Download Events</button>";
     dateValues.forEach(element => {
         console.log(element);
         var parentDiv = document.createElement('div');
@@ -138,7 +118,15 @@ function calculateKeyDates(calcDate, region, importantDates) {
     });
     console.log(impactingHolidays);
     remove_cursor_wait();
+
+    //Set events in ICS file
+    cal = ics();
+    for (num in dateValues) {
+        let dateItem = dateValues[num];
+        cal.addEvent(dateItem.desc, "NZS3910 - Contractor Claims Date", "-", Date.parse(dateItem.dateObject), Date.parse(dateItem.dateObject) + 1000);
+    }
 }
+
 
 
 /**
@@ -197,4 +185,26 @@ function parseHolidays(holidaysJSON) {
         }
     }
     return Holidays;
+}
+
+
+function cursor_wait() {
+    // switch to cursor wait for the current element over
+    let elements = $(':hover');
+    if (elements.length) {
+        // get the last element which is the one on top
+        elements.last().addClass('cursor-wait');
+    }
+    // use .off() and a unique event name to avoid duplicates
+    $('html').
+    off('mouseover.cursorwait').
+    on('mouseover.cursorwait', function(e) {
+        // switch to cursor wait for all elements you'll be over
+        $(e.target).addClass('cursor-wait');
+    });
+}
+
+function remove_cursor_wait() {
+    $('html').off('mouseover.cursorwait'); // remove event handler
+    $('.cursor-wait').removeClass('cursor-wait'); // get back to default
 }
