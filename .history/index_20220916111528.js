@@ -44,7 +44,6 @@ function startCount(date, region) {
     impactingHolidays = []; //must clear otherwise will have overlapping
     let dateObject = new Date(date);
     if (Object.keys(holidaysFromInternet).length === 0) { //Don't need to requery if already populated
-        //Get public holidays from Google
         $.getJSON('https://www.googleapis.com/calendar/v3/calendars/en.new_zealand%23holiday%40group.v.calendar.google.com/events?key=AIzaSyD2Xy5SVR22tomUkKkxKEGMIboLbAO0ATE', (data) => {
             holidaysFromInternet = parseHolidays(data)
             calculateKeyDates(dateObject, region, keyDays)

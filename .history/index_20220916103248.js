@@ -38,22 +38,16 @@ function startCount(date, region) {
         return; //Doesn't have all info
 
     cursor_wait();
-    removeAllChildNodes(document.getElementById('errors'));
-
     calcLog.innerHTML = "<h3>Calculation Breakdown:</h3>";
     impactingHolidays = []; //must clear otherwise will have overlapping
     let dateObject = new Date(date);
     if (Object.keys(holidaysFromInternet).length === 0) { //Don't need to requery if already populated
-        //Get public holidays from Google
         $.getJSON('https://www.googleapis.com/calendar/v3/calendars/en.new_zealand%23holiday%40group.v.calendar.google.com/events?key=AIzaSyD2Xy5SVR22tomUkKkxKEGMIboLbAO0ATE', (data) => {
             holidaysFromInternet = parseHolidays(data)
             calculateKeyDates(dateObject, region, keyDays)
             console.log(data)
             })
             .fail(err =>{
-                console.log("GET FAILED: " + err);
-                addError("Could not fetch Public Holidays - Will calculate without.<br><i>Please contact the developer if this issue persists.</i>");
-                calculateKeyDates(dateObject, region, keyDays);
                 remove_cursor_wait();
             })
             
@@ -175,10 +169,6 @@ function isWorkingDay(startDate, region) {
 function parseHolidays(holidaysJSON) {
     console.log("Holidays Parsed");
     Holidays = []
-    if(!holidaysJSON.items) {
-        addError("Could not fetch Public Holidays - Will calculate without.<br><i>Please contact the developer if this issue persists.</i>");
-        return [];
-    }
     for (const item in holidaysJSON.items) {
         if (holidaysJSON.items[item].description.includes("Public holiday")) {
             let dateValue = new Date(holidaysJSON.items[item].start.date);
@@ -193,11 +183,11 @@ function parseHolidays(holidaysJSON) {
 }
 
 function addError(message){
-    document.querySelector('#errors').innerHTML += `
-    <div class="alert alert-warning" role="alert">
-        ${message}
-    </div>
-    </div>`;
+let errorDiv = document.getElementById('errors');
+errorDiv.appendChild(`
+<div class="panel panel-default">
+${message}
+  </div>`)
 }
 
 function cursor_wait() {
@@ -214,12 +204,6 @@ function cursor_wait() {
         // switch to cursor wait for all elements you'll be over
         $(e.target).addClass('cursor-wait');
     });
-}
-
-function removeAllChildNodes(parent) {
-    while (parent.firstChild) {
-        parent.removeChild(parent.firstChild);
-    }
 }
 
 function remove_cursor_wait() {
