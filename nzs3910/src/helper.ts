@@ -65,14 +65,15 @@ export function createEventInfo(day: DayInfo){
     }
 }
 
-export function getChristmasException(startDate: Date){
+export function getChristmasException(startDate: Date | string){
   const chistmasShutdownLength = 13 // 24th Dec - 5th Jan, both inclusive
-  let currentDate = new Date(startDate.getFullYear(), 12, 24, 0, 0, 0)
+
+  let currentDate = new Date(new Date(startDate).getFullYear().toString() +  "-12-24")
   let extra = []
 
   for (let i = 0; i < chistmasShutdownLength; i++){
       extra.push({
-          "date": getDateAtMidnight(currentDate),
+          "date": getISODate(currentDate),
           "localName": "Christmas Shutdown",
           "name": "Christmas Shutdown",
           "countryCode": "NZ",
