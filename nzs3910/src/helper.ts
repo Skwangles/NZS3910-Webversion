@@ -24,7 +24,7 @@ export type KeyDay = {
     desc: string
 }
 
-export function getDateAtMidnight(dateString: string){
+export function getDateAtMidnight(dateString: string | Date){
   const date = new Date(dateString)
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
 }
@@ -63,4 +63,27 @@ export function createEventInfo(day: DayInfo){
       description: "NZS3910 - Contractor claims key date",
       startTime: getDateAtMidnight(day.date).toISOString()
     }
+}
+
+export function getChristmasException(startDate: Date){
+  const chistmasShutdownLength = 13 // 24th Dec - 5th Jan, both inclusive
+  let currentDate = new Date(startDate.getFullYear(), 12, 24, 0, 0, 0)
+  let extra = []
+
+  for (let i = 0; i < chistmasShutdownLength; i++){
+      extra.push({
+          "date": getDateAtMidnight(currentDate),
+          "localName": "Christmas Shutdown",
+          "name": "Christmas Shutdown",
+          "countryCode": "NZ",
+          "fixed": false,
+          "global": true,
+          "counties": null,
+          "launchYear": null,
+          "types": null
+        })
+
+      currentDate.setDate(currentDate.getDate() + 1);
+  }
+  return extra
 }
