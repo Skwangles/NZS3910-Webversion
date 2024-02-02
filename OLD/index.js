@@ -45,7 +45,7 @@ function startCount(date, region) {
     let dateObject = new Date(date);
     if (Object.keys(holidaysFromInternet).length === 0) { //Don't need to requery if already populated
         //Get public holidays from Google
-        $.getJSON('https://www.googleapis.com/calendar/v3/calendars/en.new_zealand%23holiday%40group.v.calendar.google.com/events?key=AIzaSyD2Xy5SVR22tomUkKkxKEGMIboLbAO0ATE', (data) => {
+        $.getJSON('https://date.nager.at/api/v3/NextPublicHolidays/NZ', (data) => {
             holidaysFromInternet = parseHolidays(data)
             calculateKeyDates(dateObject, region, keyDays)
             console.log(data)
@@ -180,7 +180,7 @@ function parseHolidays(holidaysJSON) {
         return [];
     }
     for (const item in holidaysJSON.items) {
-        if (holidaysJSON.items[item].description.includes("Public holiday")) {
+        if (holidaysJSON.items[item].global) {
             let dateValue = new Date(holidaysJSON.items[item].start.date);
             if (dateValue.getDay() % 6 == 0) { //Long weekend case
                 dateValue.setDate(dateValue.getDate() + (dateValue.getDay() == 0 ? 1 : 2)); //Apparently this may have issues with 29th feb & 31sts
