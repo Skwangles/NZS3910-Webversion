@@ -95,7 +95,7 @@ const BusinessDayCalculator = () => {
         {!loading && businessDays.length > 0 && (
           <div>
             <Typography variant="h6" style={{ marginTop: '20px' }}>
-              Breakdown Days:
+              Business Days:
             </Typography>
             {businessDays.map((day, index) => (
               <Typography key={index} variant="body1">
