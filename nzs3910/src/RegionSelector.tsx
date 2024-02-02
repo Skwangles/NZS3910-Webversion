@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FormControl, InputLabel, Select, MenuItem, Button, Typography } from '@mui/material';
+import { useState } from 'react';
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { regions } from './consts';
 
 const RegionSelector = ({ region, setRegion }) => {
