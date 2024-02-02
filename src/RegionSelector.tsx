@@ -2,7 +2,12 @@ import { useState } from 'react';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { regions } from './consts';
 
-const RegionSelector = ({ region, setRegion }) => {
+type RegionSelectorProps = {
+  region: string,
+  setRegion: React.Dispatch<React.SetStateAction<string>>
+}
+
+const RegionSelector = ({ region, setRegion }: RegionSelectorProps) => {
   const [selectedRegion, setSelectedRegion] = useState(region ?? regions[0].code);
 
   const handleRegionChange = (event: { target: { value: string; }; }) => {

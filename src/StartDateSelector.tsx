@@ -1,6 +1,11 @@
 import TextField from "@mui/material/TextField";
 
-export default function StartDateSelector({startDate, setStartDate}){
+type StartDateSelectorProps = {
+  startDate: string,
+  setStartDate: React.Dispatch<React.SetStateAction<string>>
+}
+
+export default function StartDateSelector({startDate, setStartDate}: StartDateSelectorProps){
     return (<TextField
         id="start-date"
         label="Start Date"
