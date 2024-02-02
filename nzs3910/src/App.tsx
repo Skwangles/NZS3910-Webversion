@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { TextField, Button, Typography, Paper, Box, Container } from '@mui/material';
+import { useState } from 'react';
+import { Button, Typography, Paper, Container } from '@mui/material';
 import RegionSelector from './RegionSelector';
-import { DayInfo, Holiday, countToDescription, getDayInformation, getISODate, isHolidayForRegion } from './helper';
-import { DEFAULT_REGION, API_URL, MAX_BUSINESSDAY_COUNT, KEY_DAYS } from './consts';
+import { DayInfo, Holiday, getDateAtMidnight, getDayInformation, getISODate, isHolidayForRegion } from './helper';
+import { DEFAULT_REGION, API_URL, MAX_BUSINESSDAY_COUNT } from './consts';
 import "./App.css"
 import CalendarLink from './Calendar';
 import StartDateSelector from './StartDateSelector';
+import HowTo from './HowTo';
 
 const BusinessDayCalculator = () => {
   const [startDate, setStartDate] = useState('');
@@ -17,8 +18,10 @@ const BusinessDayCalculator = () => {
 
       return DEFAULT_REGION
     });
+
   const [businessDays, setBusinessDays] = useState<DayInfo[]>([]);
   const [loading, setLoading] = useState(false);
+
 
   const calculateBusinessDays = async () => {
     setLoading(true);
@@ -28,7 +31,7 @@ const BusinessDayCalculator = () => {
       return;
     }
 
-    if (getISODate(new Date()) > getISODate(new Date(startDate))){
+    if (getISODate(getDateAtMidnight(new Date())) > getISODate(getDateAtMidnight(startDate))){
       alert("Warning: Date provided is before today's date, any public holidays prior to today's date are not tracked.")
     }
 
@@ -69,15 +72,19 @@ const BusinessDayCalculator = () => {
   return (
     <Container>
       <Typography variant="h3" gutterBottom sx={{textAlign:"center", py: "10px"}}>
-          Business Day Calculator
-        </Typography>
+        NZS3910 - Contractor Claims Key Dates Calculator
+      </Typography>
+
+      <HowTo/>
+
       <Paper sx={{ padding: '20px', alignItems: "center", alignContent: "center", justifyContent: "center", marginBottom: "50px"}}>
         
 
         <RegionSelector region={region} setRegion={setRegion}/>
 
         <StartDateSelector startDate={startDate} setStartDate={setStartDate} />
-
+        <br/>
+        {/* Force button onto new line */}
         <Button variant="contained" color="primary" onClick={calculateBusinessDays}>
           Calculate
         </Button>
