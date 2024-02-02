@@ -1,57 +1,35 @@
 import React, { useState } from 'react';
-import { FormControl, InputLabel, Select, MenuItem, Button } from '@mui/material';
+import { FormControl, InputLabel, Select, MenuItem, Button, Typography } from '@mui/material';
+import { regions } from './consts';
 
-const RegionSelector = ({ setRegion }) => {
-  const [selectedCounty, setSelectedCounty] = useState('');
+const RegionSelector = ({ region, setRegion }) => {
+  const [selectedRegion, setSelectedRegion] = useState(region ?? regions[0].code);
 
-  const counties = [
-    { label: 'Northland', code: 'NZ-NTL' },
-    { label: 'Auckland', code: 'NZ-AUK' },
-    { label: 'Waikato', code: 'NZ-WKO' },
-    { label: 'Bay of Plenty', code: 'NZ-BOP' },
-    { label: 'Gisborne', code: 'NZ-GIS' },
-    { label: 'Hawke\'s Bay', code: 'NZ-HKB' },
-    { label: 'Taranaki', code: 'NZ-TKI' },
-    { label: 'Manawatu-Whanganui', code: 'NZ-MWT'},
-    { label: 'Wellington', code: 'NZ-WGN' },
-    { label: 'Tasman', code: 'NZ-TAS' },
-    { label: 'Nelson', code: 'NZ-NSN' },
-    { label: 'Marlborough', code: 'NZ-MBH' },
-    { label: 'West Coast', code: 'NZ-WTC' },
-    { label: 'Canterbury', code: 'NZ-CAN' },
-    { label: 'Otago', code: 'NZ-OTA' },
-    { label: 'Southland', code: 'NZ-STL' },
-  ];
+  const handleRegionChange = (event: { target: { value: string; }; }) => {
+    setSelectedRegion(event.target.value);
 
-  const handleCountyChange = (event) => {
-    setSelectedCounty(event.target.value);
-  };
-
-  const handleUpdateRegion = () => {
-    setRegion(selectedCounty);
+    localStorage.setItem("region", event.target.value)
+    setRegion(event.target.value);
   };
 
   return (
     <div style={{ marginBottom: '20px' }}>
-      <FormControl fullWidth>
-        <InputLabel id="county-label">Select County</InputLabel>
+      <FormControl>
+        <InputLabel id="Region-label">Select Region</InputLabel>
         <Select
-          labelId="county-label"
-          id="county-select"
-          value={selectedCounty}
-          label="Select County"
-          onChange={handleCountyChange}
+          labelId="region-label"
+          id="region-select"
+          value={selectedRegion}
+          label="Select Region"
+          onChange={handleRegionChange}
         >
-          {counties.map((county) => (
-            <MenuItem key={county.code} value={county.code}>
-              {county.label}
+          {regions.map((regInfo) => (
+            <MenuItem key={regInfo.code} value={regInfo.code}>
+              {regInfo.label}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
-      <Button variant="contained" color="primary" onClick={handleUpdateRegion}>
-        Update Region
-      </Button>
     </div>
   );
 };
