@@ -4,6 +4,8 @@ import RegionSelector from './RegionSelector';
 import { DayInfo, Holiday, countToDescription, getDayInformation, getISODate, isHolidayForRegion } from './helper';
 import { DEFAULT_REGION, API_URL, MAX_BUSINESSDAY_COUNT, KEY_DAYS } from './consts';
 import "./App.css"
+import CalendarLink from './Calendar';
+import StartDateSelector from './StartDateSelector';
 
 const BusinessDayCalculator = () => {
   const [startDate, setStartDate] = useState('');
@@ -43,12 +45,13 @@ const BusinessDayCalculator = () => {
     const businessDaysList = [];
 
     while (businessDayCount < MAX_BUSINESSDAY_COUNT) {
-      const day = getDayInformation(currentDate, applicableHolidays)
+      const day = getDayInformation(currentDate, applicableHolidays, businessDayCount)
 
       businessDaysList.push({
         date: currentDate.toISOString().split('T')[0],
         isBusinessDay: day.isBusinessDay,
-        description: (day.isBusinessDay ? countToDescription(businessDayCount, KEY_DAYS) : "") + day.description
+        description: (day.isBusinessDay ? businessDayCount.toString() + (day.description !== "" ? " - " : ""): "") + day.description,
+        makeEvent: day.makeEvent ?? false
       });
 
       if (day.isBusinessDay) {
@@ -73,17 +76,7 @@ const BusinessDayCalculator = () => {
 
         <RegionSelector region={region} setRegion={setRegion}/>
 
-        <TextField
-          id="start-date"
-          label="Start Date"
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          InputLabelProps={{
-            shrink: true,
-          }}
-          style={{ marginBottom: '20px' }}
-        />
+        <StartDateSelector startDate={startDate} setStartDate={setStartDate} />
 
         <Button variant="contained" color="primary" onClick={calculateBusinessDays}>
           Calculate
@@ -98,9 +91,12 @@ const BusinessDayCalculator = () => {
               Business Days:
             </Typography>
             {businessDays.map((day, index) => (
+              <>
               <Typography key={index} variant="body1">
                 {day.date} - {day.isBusinessDay ? <b> {day.description} </b> : day.description}
               </Typography>
+              { day.makeEvent ? <CalendarLink day={day}/> : ""}
+              </>
             ))}
           </div>
         )}
