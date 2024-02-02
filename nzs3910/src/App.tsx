@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, Typography, Paper, Container } from '@mui/material';
 import RegionSelector from './RegionSelector';
-import { DayInfo, Holiday, getDateAtMidnight, getDayInformation, getISODate, isHolidayForRegion } from './helper';
+import { DayInfo, Holiday, getDateAtMidnight, getDayInformation, getISODate, isHolidayForRegion, getChristmasException } from './helper';
 import { DEFAULT_REGION, API_URL, MAX_BUSINESSDAY_COUNT } from './consts';
 import "./App.css"
 import CalendarLink from './Calendar';
@@ -37,7 +37,7 @@ const BusinessDayCalculator = () => {
 
     // Fetch public holidays
     const response = await fetch(API_URL);
-    const holidays = await response.json();
+    const holidays = (await response.json()).concat(getChristmasException(startDate));
 
     const applicableHolidays = holidays
       .filter((holiday: Holiday) => isHolidayForRegion(holiday, region))
