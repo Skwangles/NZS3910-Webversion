@@ -1,3 +1,5 @@
+import { KEY_DAYS } from "./consts"
+
 export type Holiday = {
     date: string,
       localName: string,
@@ -13,12 +15,18 @@ export type Holiday = {
 export  type DayInfo = {
     date: string,
     isBusinessDay: boolean,
-    description: string
+    description: string,
+    makeEvent?: boolean
   }
 
 export type KeyDay = {
     days: number,
     desc: string
+}
+
+export function getDateAtMidnight(dateString: string){
+  const date = new Date(dateString)
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
 }
 
 export function getISODate(date: Date) { return date.toISOString().split('T')[0]}
@@ -31,14 +39,7 @@ export function isHolidayForRegion(holiday: Holiday, region: string) {
     return (region !== "" && holiday.counties?.includes(region))
   }
 
-export function countToDescription(count: number, keyDays: KeyDay[]) {
-    for (const keyDay of keyDays){
-      if (count == keyDay.days) return count.toString() + " - " + keyDay.desc + " ";
-    }
-    return count
-  }
-
-export function getDayInformation(date:Date, excludedDates: Holiday[]){
+export function getDayInformation(date:Date, excludedDates: Holiday[], count: number){
     if (isWeekend(date)) return { isBusinessDay: false, description: "Weekend"}
 
     for (let holiday of excludedDates) {
@@ -47,5 +48,19 @@ export function getDayInformation(date:Date, excludedDates: Holiday[]){
       }
     }
 
-    return { isBusinessDay: true, description: ""}
+    const impactingKeyDay = KEY_DAYS.find(keyDay => keyDay.days === count)
+    if (impactingKeyDay){
+      return { isBusinessDay: true, description: impactingKeyDay.desc, makeEvent: impactingKeyDay.makeEvent}
+    }
+
+    return { isBusinessDay: true, description: "", makeEvent: false}
   }
+
+
+export function createEventInfo(day: DayInfo){
+    return {
+      title: day.description,
+      description: "NZS3910 - Contractor claims key date",
+      startTime: getDateAtMidnight(day.date).toISOString()
+    }
+}
