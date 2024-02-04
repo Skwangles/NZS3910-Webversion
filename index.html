@@ -1,75 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- CSS only -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
-    <!-- JavaScript Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="style.css">
-    <title>NZS3910 Due Dates</title>
-</head>
-
-<body>
-    <div class="container-md">
-    <div class="card my-4">
-        <h1 class="my-2 text-center">NZS 3910:2013 - Contractor Claims deadlines</h1>
-        <div class="information">
-            <div class="my-4 mx-3">
-                <b>Please note this tool uses important specifications from the NZS 3910:2013 - References where applicable included</b><br>
-                <b>Date claim received</b> - date on which the payment claim was 'served' on the Engineer (1.5, G12.2.4).<br>
-                <b>Date Claim Received is counted as day 0</b> Day 1 is the Working Day AFTER you receive/are served it.<br>
-                <b>Important:</b> If you received the claim after 5PM or on a non-Working Day, you must select the NEXT Working Day (15.1.8).<br>
-                <b>Working Day:</b> A day other than Saturday, Sunday, public holidays, or during 24th Dec-5th Jan (both inclusive) (1.2)<br>
-                <i>All key dates where taken from 12.2, which outlines the important deadlines.</i>
-            </div>
-        </div>
-
-        <div class="card-body">
-            <form id="dateSelect" class="my-4">
-                <div class="form-group">
-                    <label for="region">Choose your region:</label>
-                    <select name="region" class="form-control" id="region" form="dateSelect" required> 
-                    <option value="Auckland">Auckland</option>
-                    <option value="Bay of Plenty">BoP</option>
-                    <option value="Canterbury">Canterbury</option>
-                    <option value="Gisborne">Gisborne</option>
-                    <option value="Hawke's Bay">Hawke's Bay</option>
-                    <option value="Manwatu-Whanganui">Manawatu-Whanganui</option>
-                    <option value="Marlborough">Marlborough</option>
-                    <option value="Nelson">Nelson</option>
-                    <option value="Northland">Northland</option>
-                    <option value="Otago">Otago</option>
-                    <option value="Southland">Southland</option>
-                    <option value="Taranaki">Taranaki</option>
-                    <option value="Tasman">Tasman</option>
-                    <option value="Waikato" selected="selected">Waikato</option>
-                    <option value="Wellington">Wellington</option>
-                    <option value="West Coast"></option>
-                </select>
-                </div>
-                <div class="form-group my-2">
-                    <label for="startDate">Choose the date claim received:</label>
-                    <input title="Service Date" class="form-control" type="date" name="startDate" id="startDate" required pattern="\d{4}-\d{2}-\d{2}">
-                </div>
-                <button type="button" class="btn btn-primary" id="submitForm">Calculate!</button>
-            </form>
-            <div id="errors" class="container col"></div>
-            <div id="dateOut" class="container col"></div>
-            <pre id="calculations" class="container card-body"></pre>
-        </div>
-    </div>
-    </div>
-    <footer><i>To contact me about a bug, please send an email to
-        <a title="DevEmail" href="mailto:skwangles@gmail.com">Skwangles@gmail.com</a></i>
-    </footer>
-</body>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="ics.deps.js"></script>
-<script src="ics.min.js"></script>
-<script src="index.js"></script>
-
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NZS3910 Date Calc</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
